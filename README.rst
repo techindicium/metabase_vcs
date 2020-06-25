@@ -31,18 +31,19 @@ to be declared at the tracked_dashboards.json file at the root of your repo
 example of a tracked_dashboards.json file:
 
 .. code-block::
-        {
-        "dashboards": [
-                {
-                        "name": "dashboard_one", # this will be the name of the json file exported
-                        "id": 147   # the metabase dashboard id
-                },
-                {
-                        "name": "dashboard_two",
-                        "id": 166
-                }
-                ]
-        }
+    
+    {
+    "dashboards": [
+            {
+                    "name": "dashboard_one", # this will be the name of the json file exported
+                    "id": 147   # the metabase dashboard id
+            },
+            {
+                    "name": "dashboard_two",
+                    "id": 166
+            }
+            ]
+    }
 
 
 Create a 'dashboards' dir at the root of your repo
@@ -50,6 +51,7 @@ then run
 
 
 .. code-block::
+
         metabase_vcs export-metabase
 
 
@@ -60,6 +62,7 @@ Then you can change a tracked dashboard, run the export-metabase again and
 check the diffs
 
 .. code-block::
+
         git diff dashboards/
 
 
