@@ -1,8 +1,8 @@
 import json
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from app.models import ReportDashboard, ReportCard
-from app.env import *
+from models.models import ReportDashboard, ReportCard
+from models.env import *
 
 db_metabase_prod = get_env_var_or_fail("DB_NAME")
 

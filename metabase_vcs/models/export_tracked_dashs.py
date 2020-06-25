@@ -1,6 +1,6 @@
 import json
-from metabase_vcs.app.models import ReportDashboard, ReportDashboardcard, ReportCard 
-from metabase_vcs.app.env import *
+from metabase_vcs.models.models import ReportDashboard, ReportDashboardcard, ReportCard 
+from metabase_vcs.models.env import *
 
 def serialize_dashboard(dashboard, session):
     dashboard_id = dashboard['id']
