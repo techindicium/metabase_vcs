@@ -34,7 +34,6 @@ def prepare_db():
     stdout, stderr = process.communicate()
     
     while process.poll() is None:
-        print(stdout)
         time.sleep(2)
 
     engine = create_engine(
@@ -43,12 +42,18 @@ def prepare_db():
 
     Session = sessionmaker(bind=engine)
     session = Session()
-    return {'exit_code': process.returncode, 'session': session}
+    return {
+        'exit_code': process.returncode,
+        'stdout': stdout,
+        'stderr': stderr,
+        'session': session
+    }
 
 
 def test_dashboard_changes(prepare_db):
     """Test that dashboard information changes."""
-   
+    print(prepare_db['stderr'])
+    
     assert prepare_db['exit_code'] == 0
     session = prepare_db['session']
     dash = session.query(ReportDashboard).filter(ReportDashboard.id == 147).first()
@@ -71,7 +76,8 @@ def test_dashboard_changes(prepare_db):
 
 def test_dashboard_card_changes(prepare_db):
     """Test cards that belongs to a dashboard changes."""
-   
+    print(prepare_db['stderr'])
+    
     assert prepare_db['exit_code'] == 0
     session = prepare_db['session']
     card = session.query(ReportCard).filter(ReportCard.id == 437).first()
