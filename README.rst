@@ -49,7 +49,6 @@ example of a tracked_dashboards.json file:
 Create a 'dashboards' dir at the root of your repo
 then run
 
-
 .. code-block::
 
         metabase_vcs export-metabase
