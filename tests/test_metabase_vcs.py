@@ -66,6 +66,8 @@ def test_dashboard_changes(prepare_db):
     assert dash.name == 'CRM - Duplique'
     assert result.exit_code == 0
 
+    session.close()
+
 
 def test_dashboard_card_changes(prepare_db):
     """Test cards that belongs to a dashboard changes."""
@@ -86,3 +88,5 @@ def test_dashboard_card_changes(prepare_db):
     session.refresh(card)
     assert card.name == 'LeadsBad'
     assert result.exit_code == 0
+
+    session.close()
