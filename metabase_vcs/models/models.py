@@ -87,24 +87,25 @@ class Label(BaseModel):
 class MetabaseDatabase(BaseModel):
     __tablename__ = 'metabase_database'
 
-    id = Column(Integer, primary_key=True, server_default=text("nextval('metabase_database_id_seq'::regclass)"))
-    created_at = Column(DateTime(True), nullable=False)
-    updated_at = Column(DateTime(True), nullable=False)
-    name = Column(String(254), nullable=False)
-    description = Column(Text)
-    details = Column(Text)
-    engine = Column(String(254), nullable=False)
-    is_sample = Column(Boolean, nullable=False, server_default=text("false"))
-    is_full_sync = Column(Boolean, nullable=False, server_default=text("true"))
-    points_of_interest = Column(Text)
-    caveats = Column(Text)
-    metadata_sync_schedule = Column(String(254), nullable=False, server_default=text("'0 50 * * * ? *'::character varying"), comment='The cron schedule string for when this database should undergo the metadata sync process (and analysis for new fields).')
-    cache_field_values_schedule = Column(String(254), nullable=False, server_default=text("'0 50 0 * * ? *'::character varying"), comment='The cron schedule string for when FieldValues for eligible Fields should be updated.')
-    timezone = Column(String(254), comment='Timezone identifier for the database, set by the sync process')
-    is_on_demand = Column(Boolean, nullable=False, server_default=text("false"), comment='Whether we should do On-Demand caching of FieldValues for this DB. This means FieldValues are updated when their Field is used in a Dashboard or Card param.')
-    options = Column(Text, comment='Serialized JSON containing various options like QB behavior.')
-    auto_run_queries = Column(Boolean, nullable=False, server_default=text("true"), comment='Whether to automatically run queries when doing simple filtering and summarizing in the Query Builder.')
+    id = Column(Integer, primary_key=True, server_default=text("nextval('metabase_database_id_seq'::regclass)"), supports_json=True)
+    created_at = Column(DateTime(True), nullable=False, supports_json=True)
+    updated_at = Column(DateTime(True), nullable=False, supports_json=True)
+    name = Column(String(254), nullable=False, supports_json=True)
+    description = Column(Text, supports_json=True)
+    details = Column(Text, supports_json=False) # metabase shows the password here, so no details.
+    engine = Column(String(254), nullable=False, supports_json=True)
+    is_sample = Column(Boolean, nullable=False, server_default=text("false"), supports_json=True)
+    is_full_sync = Column(Boolean, nullable=False, server_default=text("true"), supports_json=True)
+    points_of_interest = Column(Text, supports_json=True)
+    caveats = Column(Text, supports_json=True)
+    metadata_sync_schedule = Column(String(254), nullable=False, server_default=text("'0 50 * * * ? *'::character varying"), comment='The cron schedule string for when this database should undergo the metadata sync process (and analysis for new fields).', supports_json=False)
+    cache_field_values_schedule = Column(String(254), nullable=False, server_default=text("'0 50 0 * * ? *'::character varying"), comment='The cron schedule string for when FieldValues for eligible Fields should be updated.', supports_json=True)
+    timezone = Column(String(254), comment='Timezone identifier for the database, set by the sync process', supports_json=True)
+    is_on_demand = Column(Boolean, nullable=False, server_default=text("false"), comment='Whether we should do On-Demand caching of FieldValues for this DB. This means FieldValues are updated when their Field is used in a Dashboard or Card param.', supports_json=True)
+    options = Column(Text, comment='Serialized JSON containing various options like QB behavior.', supports_json=True)
+    auto_run_queries = Column(Boolean, nullable=False, server_default=text("true"), comment='Whether to automatically run queries when doing simple filtering and summarizing in the Query Builder.', supports_json=True)
 
+    metabase_database_tables = relationship("MetabaseTable", supports_json=True)
 
 class PermissionsGroup(BaseModel):
     __tablename__ = 'permissions_group'
@@ -325,33 +326,6 @@ class CoreSession(BaseModel):
     user = relationship('CoreUser')
 
 
-class MetabaseTable(BaseModel):
-    __tablename__ = 'metabase_table'
-    __table_args__ = (
-        UniqueConstraint('db_id', 'schema', 'name'),
-        Index('idx_uniq_table_db_id_schema_name_2col', 'db_id', 'name', unique=True)
-    )
-
-    id = Column(Integer, primary_key=True, server_default=text("nextval('metabase_table_id_seq'::regclass)"))
-    created_at = Column(DateTime(True), nullable=False)
-    updated_at = Column(DateTime(True), nullable=False)
-    name = Column(String(254), nullable=False)
-    rows = Column(BigInteger)
-    description = Column(Text)
-    entity_name = Column(String(254))
-    entity_type = Column(String(254))
-    active = Column(Boolean, nullable=False)
-    db_id = Column(ForeignKey('metabase_database.id', deferrable=True), nullable=False, index=True)
-    display_name = Column(String(254))
-    visibility_type = Column(String(254))
-    schema = Column(String(254), index=True)
-    points_of_interest = Column(Text)
-    caveats = Column(Text)
-    show_in_getting_started = Column(Boolean, nullable=False, index=True, server_default=text("false"))
-    fields_hash = Column(Text, comment='Computed hash of all of the fields associated to this table')
-
-    db = relationship('MetabaseDatabase')
-
 
 class Permission(BaseModel):
     __tablename__ = 'permissions'
@@ -540,6 +514,34 @@ class ComputationJobResult(BaseModel):
     job = relationship('ComputationJob')
 
 
+class MetabaseTable(BaseModel):
+    __tablename__ = 'metabase_table'
+    __table_args__ = (
+        UniqueConstraint('db_id', 'schema', 'name'),
+        Index('idx_uniq_table_db_id_schema_name_2col', 'db_id', 'name', unique=True)
+    )
+
+    id = Column(Integer, primary_key=True, server_default=text("nextval('metabase_table_id_seq'::regclass)"), supports_json=True)
+    created_at = Column(DateTime(True), nullable=False, supports_json=True)
+    updated_at = Column(DateTime(True), nullable=False, supports_json=True)
+    name = Column(String(254), nullable=False, supports_json=True)
+    rows = Column(BigInteger, supports_json=True)
+    description = Column(Text, supports_json=True)
+    entity_name = Column(String(254), supports_json=True)
+    entity_type = Column(String(254), supports_json=True)
+    active = Column(Boolean, nullable=False, supports_json=True)
+    db_id = Column(ForeignKey('metabase_database.id', deferrable=True), nullable=False, index=True, supports_json=True)
+    display_name = Column(String(254), supports_json=True)
+    visibility_type = Column(String(254), supports_json=True)
+    schema = Column(String(254), index=True, supports_json=True)
+    points_of_interest = Column(Text, supports_json=True)
+    caveats = Column(Text, supports_json=True)
+    show_in_getting_started = Column(Boolean, nullable=False, index=True, server_default=text("false"), supports_json=True)
+    fields_hash = Column(Text, comment='Computed hash of all of the fields associated to this table', supports_json=True)
+
+    metabase_table_fields = relationship("MetabaseField", supports_json=True)
+    db = relationship('MetabaseDatabase')
+
 class MetabaseField(BaseModel):
     __tablename__ = 'metabase_field'
     __table_args__ = (
@@ -547,32 +549,32 @@ class MetabaseField(BaseModel):
         Index('idx_uniq_field_table_id_parent_id_name_2col', 'table_id', 'name', unique=True)
     )
 
-    id = Column(Integer, primary_key=True, server_default=text("nextval('metabase_field_id_seq'::regclass)"))
-    created_at = Column(DateTime(True), nullable=False)
-    updated_at = Column(DateTime(True), nullable=False)
-    name = Column(String(254), nullable=False)
-    base_type = Column(String(255), nullable=False)
-    special_type = Column(String(255))
-    active = Column(Boolean, nullable=False, server_default=text("true"))
-    description = Column(Text)
-    preview_display = Column(Boolean, nullable=False, server_default=text("true"))
-    position = Column(Integer, nullable=False, server_default=text("0"))
-    table_id = Column(ForeignKey('metabase_table.id', deferrable=True), nullable=False, index=True)
-    parent_id = Column(ForeignKey('metabase_field.id', deferrable=True), index=True)
-    display_name = Column(String(254))
-    visibility_type = Column(String(32), nullable=False, server_default=text("'normal'::character varying"))
-    fk_target_field_id = Column(Integer)
-    last_analyzed = Column(DateTime(True))
-    points_of_interest = Column(Text)
-    caveats = Column(Text)
-    fingerprint = Column(Text, comment='Serialized JSON containing non-identifying information about this Field, such as min, max, and percent JSON. Used for classification.')
-    fingerprint_version = Column(Integer, nullable=False, server_default=text("0"), comment='The version of the fingerprint for this Field. Used so we can keep track of which Fields need to be analyzed again when new things are added to fingerprints.')
-    database_type = Column(Text, nullable=False, comment='The actual type of this column in the database. e.g. VARCHAR or TEXT.')
-    has_field_values = Column(Text, comment='Whether we have FieldValues ("list"), should ad-hoc search ("search"), disable entirely ("none"), or infer dynamically (null)"')
-    settings = Column(Text, comment='Serialized JSON FE-specific settings like formatting, etc. Scope of what is stored here may increase in future.')
+    id = Column(Integer, primary_key=True, server_default=text("nextval('metabase_field_id_seq'::regclass)"), supports_json=True)
+    created_at = Column(DateTime(True), nullable=False, supports_json=False)
+    updated_at = Column(DateTime(True), nullable=False, supports_json=False)
+    name = Column(String(254), nullable=False, supports_json=False)
+    base_type = Column(String(255), nullable=False, supports_json=False)
+    special_type = Column(String(255), supports_json=False)
+    active = Column(Boolean, nullable=False, server_default=text("true"), supports_json=False)
+    description = Column(Text, supports_json=False)
+    preview_display = Column(Boolean, nullable=False, server_default=text("true"), supports_json=False)
+    position = Column(Integer, nullable=False, server_default=text("0"), supports_json=False)
+    table_id = Column(ForeignKey('metabase_table.id', deferrable=True), nullable=False, index=True, supports_json=False)
+    parent_id = Column(ForeignKey('metabase_field.id', deferrable=True), index=True, supports_json=False)
+    display_name = Column(String(254), supports_json=False)
+    visibility_type = Column(String(32), nullable=False, server_default=text("'normal'::character varying"), supports_json=False)
+    fk_target_field_id = Column(Integer, supports_json=False)
+    last_analyzed = Column(DateTime(True), supports_json=False)
+    points_of_interest = Column(Text, supports_json=False)
+    caveats = Column(Text, supports_json=False)
+    fingerprint = Column(Text, comment='Serialized JSON containing non-identifying information about this Field, such as min, max, and percent JSON. Used for classification.', supports_json=False)
+    fingerprint_version = Column(Integer, nullable=False, server_default=text("0"), comment='The version of the fingerprint for this Field. Used so we can keep track of which Fields need to be analyzed again when new things are added to fingerprints.', supports_json=False)
+    database_type = Column(Text, nullable=False, comment='The actual type of this column in the database. e.g. VARCHAR or TEXT.', supports_json=False)
+    has_field_values = Column(Text, comment='Whether we have FieldValues ("list"), should ad-hoc search ("search"), disable entirely ("none"), or infer dynamically (null)"', supports_json=False)
+    settings = Column(Text, comment='Serialized JSON FE-specific settings like formatting, etc. Scope of what is stored here may increase in future.', supports_json=False)
 
     parent = relationship('MetabaseField', remote_side=[id])
-    table = relationship('MetabaseTable')
+    table = relationship('MetabaseTable', back_populates="metabase_table_fields")
 
 
 class Metric(BaseModel):

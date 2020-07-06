@@ -26,9 +26,9 @@ An attempt to serialize and keep dashboards in a VCS such as git
 Tracking Metabase Dashboards
 ---------------------------------------
 So far metabase_vcs will only track dashboards, and this dashboards needs
-to be declared at the tracked_dashboards.json file at the root of your repo
+to be declared at the tracked.json file at the root of your repo
 
-example of a tracked_dashboards.json file:
+example of a tracked.json file:
 
 .. code-block::
     
