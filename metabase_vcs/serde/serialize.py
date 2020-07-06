@@ -28,13 +28,13 @@ def serialize_database(database, session):
         .filter(MetabaseTable.db_id == database_id) \
         .filter(MetabaseTable.schema.in_(schemas)).all()
 
-    database_obj = database_from_db.to_json(max_nesting=1)
+    database_obj = json.loads(database_from_db.to_json(max_nesting=1))
     json_tables = []
     
     total_tables = len(tables)
     count = 0
     for table in tables:
-        json_tables.append(table.to_json(max_nesting=4))
+        json_tables.append(json.loads(table.to_json(max_nesting=4)))
         count += 1
         print('Done table: ' + str(table.name))
         print('finished {} of {}'.format(count, total_tables))
@@ -42,5 +42,4 @@ def serialize_database(database, session):
     database_obj['tables'] = json_tables
     
     with open(f"databases/{database_name}.json", 'w', encoding='utf-8') as f:
-        json_str = json.loads(database_obj)
-        f.write(json.dumps(json_str, indent=4, sort_keys=True))
+        f.write(json.dumps(database_obj, indent=4, sort_keys=True))

@@ -106,4 +106,5 @@ ENV/
 
 # My stuff
 dashboards/
+databases
 tracked.json
