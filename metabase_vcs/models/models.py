@@ -9,23 +9,23 @@ metadata = BaseModel.metadata
 class CoreUser(BaseModel):
     __tablename__ = 'core_user'
 
-    id = Column(Integer, primary_key=True, server_default=text("nextval('core_user_id_seq'::regclass)"))
-    email = Column(String(254), nullable=False, unique=True)
-    first_name = Column(String(254), nullable=False)
-    last_name = Column(String(254), nullable=False)
-    password = Column(String(254), nullable=False)
-    password_salt = Column(String(254), nullable=False, server_default=text("'default'::character varying"))
-    date_joined = Column(DateTime(True), nullable=False)
-    last_login = Column(DateTime(True))
-    is_superuser = Column(Boolean, nullable=False)
-    is_active = Column(Boolean, nullable=False)
-    reset_token = Column(String(254))
-    reset_triggered = Column(BigInteger)
-    is_qbnewb = Column(Boolean, nullable=False, server_default=text("true"))
-    google_auth = Column(Boolean, nullable=False, server_default=text("false"))
-    ldap_auth = Column(Boolean, nullable=False, server_default=text("false"))
-    login_attributes = Column(Text, comment='JSON serialized map with attributes used for row level permissions')
-    updated_at = Column(DateTime, comment='When was this User last updated?')
+    id = Column(Integer, primary_key=True, server_default=text("nextval('core_user_id_seq'::regclass)"), supports_json=True)
+    email = Column(String(254), nullable=False, unique=True, supports_json=True)
+    first_name = Column(String(254), nullable=False, supports_json=True)
+    last_name = Column(String(254), nullable=False, supports_json=True)
+    password = Column(String(254), nullable=False, supports_json=True)
+    password_salt = Column(String(254), nullable=False, server_default=text("'default'::character varying"), supports_json=True)
+    date_joined = Column(DateTime(True), nullable=False, supports_json=True)
+    last_login = Column(DateTime(True), supports_json=False)
+    is_superuser = Column(Boolean, nullable=False, supports_json=True)
+    is_active = Column(Boolean, nullable=False, supports_json=True)
+    reset_token = Column(String(254), supports_json=True)
+    reset_triggered = Column(BigInteger, supports_json=True)
+    is_qbnewb = Column(Boolean, nullable=False, server_default=text("true"), supports_json=True)
+    google_auth = Column(Boolean, nullable=False, server_default=text("false"), supports_json=True)
+    ldap_auth = Column(Boolean, nullable=False, server_default=text("false"), supports_json=True)
+    login_attributes = Column(Text, comment='JSON serialized map with attributes used for row level permissions', supports_json=True)
+    updated_at = Column(DateTime, comment='When was this User last updated?', supports_json=False)
 
 
 class DataMigration(BaseModel):
@@ -105,7 +105,6 @@ class MetabaseDatabase(BaseModel):
     options = Column(Text, comment='Serialized JSON containing various options like QB behavior.', supports_json=True)
     auto_run_queries = Column(Boolean, nullable=False, server_default=text("true"), comment='Whether to automatically run queries when doing simple filtering and summarizing in the Query Builder.', supports_json=True)
 
-    metabase_database_tables = relationship("MetabaseTable", supports_json=True)
 
 class PermissionsGroup(BaseModel):
     __tablename__ = 'permissions_group'
@@ -274,14 +273,14 @@ class Collection(BaseModel):
     __tablename__ = 'collection'
     __table_args__ = {'comment': 'Collections are an optional way to organize Cards and handle permissions for them.'}
 
-    id = Column(Integer, primary_key=True, server_default=text("nextval('collection_id_seq'::regclass)"))
-    name = Column(Text, nullable=False, comment='The user-facing name of this Collection.')
-    description = Column(Text, comment='Optional description for this Collection.')
-    color = Column(CHAR(7), nullable=False, comment='Seven-character hex color for this Collection, including the preceding hash sign.')
-    archived = Column(Boolean, nullable=False, server_default=text("false"), comment='Whether this Collection has been archived and should be hidden from users.')
-    location = Column(String(254), nullable=False, index=True, server_default=text("'/'::character varying"), comment='Directory-structure path of ancestor Collections. e.g. "/1/2/" means our Parent is Collection 2, and their parent is Collection 1.')
-    personal_owner_id = Column(ForeignKey('core_user.id', deferrable=True), unique=True, comment='If set, this Collection is a personal Collection, for exclusive use of the User with this ID.')
-    slug = Column(String(254), nullable=False, comment='Sluggified version of the Collection name. Used only for display purposes in URL; not unique or indexed.')
+    id = Column(Integer, primary_key=True, server_default=text("nextval('collection_id_seq'::regclass)"), supports_json=True)
+    name = Column(Text, nullable=False, comment='The user-facing name of this Collection.', supports_json=True)
+    description = Column(Text, comment='Optional description for this Collection.', supports_json=True)
+    color = Column(CHAR(7), nullable=False, comment='Seven-character hex color for this Collection, including the preceding hash sign.', supports_json=True)
+    archived = Column(Boolean, nullable=False, server_default=text("false"), comment='Whether this Collection has been archived and should be hidden from users.', supports_json=True)
+    location = Column(String(254), nullable=False, index=True, server_default=text("'/'::character varying"), comment='Directory-structure path of ancestor Collections. e.g. "/1/2/" means our Parent is Collection 2, and their parent is Collection 1.', supports_json=True)
+    personal_owner_id = Column(ForeignKey('core_user.id', deferrable=True), unique=True, comment='If set, this Collection is a personal Collection, for exclusive use of the User with this ID.', supports_json=True)
+    slug = Column(String(254), nullable=False, comment='Sluggified version of the Collection name. Used only for display purposes in URL; not unique or indexed.', supports_json=True)
 
     personal_owner = relationship('CoreUser', uselist=False)
 
@@ -559,7 +558,7 @@ class MetabaseField(BaseModel):
     description = Column(Text, supports_json=True)
     preview_display = Column(Boolean, nullable=False, server_default=text("true"), supports_json=True)
     position = Column(Integer, nullable=False, server_default=text("0"), supports_json=True)
-    table_id = Column(ForeignKey('metabase_table.id', deferrable=True), nullable=False, index=True, supports_json=True)
+    table_id = Column(ForeignKey('metabase_table.id', deferrable=False), nullable=False, index=True, supports_json=True)
     parent_id = Column(ForeignKey('metabase_field.id', deferrable=True), index=True, supports_json=True)
     display_name = Column(String(254), supports_json=True)
     visibility_type = Column(String(32), nullable=False, server_default=text("'normal'::character varying"), supports_json=True)
@@ -574,7 +573,7 @@ class MetabaseField(BaseModel):
     settings = Column(Text, comment='Serialized JSON FE-specific settings like formatting, etc. Scope of what is stored here may increase in future.', supports_json=True)
 
     parent = relationship('MetabaseField', remote_side=[id])
-    table = relationship('MetabaseTable', back_populates="metabase_table_fields")
+    #table = relationship('MetabaseTable', back_populates="metabase_table_fields")
 
 
 class Metric(BaseModel):
