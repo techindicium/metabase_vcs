@@ -7,6 +7,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, joinedload
 from metabase_vcs.utils import get_env_var_or_fail
 
+NEGATE_ALL_REGEX = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX' # vveeeery weird vitor
 
 @click.group()
 def main(args=None):
@@ -46,7 +47,14 @@ def export_metabase(dashboards_file, dashboards_tracked_dir):
     
     for database in tracked['databases']:
         extra_tables = dashboard_dependent_tables.get(database['id'])
-        serialize_database(database, session, dashboards_tracked_dir, extra_tables)
+        serialize_database(database, session, dashboards_tracked_dir, database.get('regex_list', []), extra_tables)
+    
+    for database, tables in dashboard_dependent_tables.items():
+        tracked_db_ids = [db['id'] for db in tracked['databases']]
+        if database in tracked_db_ids:
+            continue
+        # required database not tracked
+        serialize_database({'id': database, 'schemas': []}, session, dashboards_tracked_dir, NEGATE_ALL_REGEX, extra_tables=tables)
 
     session.close()
 
