@@ -524,7 +524,6 @@ class MetabaseTable(BaseModel):
     created_at = Column(DateTime(True), nullable=False, supports_json=True)
     updated_at = Column(DateTime(True), nullable=False, supports_json=True)
     name = Column(String(254), nullable=False, supports_json=True)
-    rows = Column(BigInteger, supports_json=True)
     description = Column(Text, supports_json=True)
     entity_name = Column(String(254), supports_json=True)
     entity_type = Column(String(254), supports_json=True)
@@ -536,7 +535,6 @@ class MetabaseTable(BaseModel):
     points_of_interest = Column(Text, supports_json=True)
     caveats = Column(Text, supports_json=True)
     show_in_getting_started = Column(Boolean, nullable=False, index=True, server_default=text("false"), supports_json=True)
-    fields_hash = Column(Text, comment='Computed hash of all of the fields associated to this table', supports_json=True)
 
     metabase_table_fields = relationship("MetabaseField", supports_json=True)
     db = relationship('MetabaseDatabase')
@@ -689,7 +687,6 @@ class ReportCard(BaseModel):
     embedding_params = Column(Text, comment='Serialized JSON containing information about required parameters that must be supplied when embedding this Card.', supports_json=True)
     cache_ttl = Column(Integer, comment='The maximum time, in seconds, to return cached results for this Card rather than running a new query.', supports_json=True)
     result_metadata = Column(Text, comment='Serialized JSON containing metadata about the result columns from running the query.', supports_json=False)
-    read_permissions = Column(Text, comment='Permissions required to view this Card and run its query.', supports_json=True)
     collection_position = Column(SmallInteger, comment='Optional pinned position for this item in its Collection. NULL means item is not pinned.', supports_json=True)
 
     collection = relationship('Collection')
