@@ -41,7 +41,12 @@ def export_metabase(dashboards_file, dashboards_tracked_dir):
 
     dashboard_dependent_tables = {}
     for dashboard in tracked['dashboards']:
-        serialize_dashboard(dashboard, session, dashboards_tracked_dir)
+        try:
+            serialize_dashboard(dashboard, session, dashboards_tracked_dir)
+        except Exception as e:
+            print(str(e))
+            raise Exception(f"Error serializing dashboard: {dashboard}")
+
         dependent_tables = extract_required_tables_dashboard(dashboard, session)
         dashboard_dependent_tables = combine_dicts(dashboard_dependent_tables, dependent_tables)
     

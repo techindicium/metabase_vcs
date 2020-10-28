@@ -63,15 +63,24 @@ def extract_required_tables_dashboardcard(dashboardcard):
            card_visualiztion_fields
     
 
-def get_maybe_field(json_list, key):
-    if isinstance(json_list, int):
-        return []
-    if json_list[0] == 'field-id':
-        return [json_list[1]]
-    elif json_list[0] == key:
-        return [get_maybe_field(fld, key)[0] for fld in json_list[1:]]
+def traverse(item):
+    if isinstance(item, list) and item[0] == 'field-id':
+        yield item[1]
     else:
-        return []
+        for i in item:
+            if isinstance(i, list) and i[0] == 'field-id':
+                yield i[1]
+            if isinstance(i, list) and i[0] != 'field-id':
+                for j in traverse(i):
+                    yield j
+
+def get_maybe_field(json_list):
+    if isinstance(json_list, list):
+        lis = [k for k in traverse(json_list)]
+    else:
+        lis = []
+
+    return lis
 
 def get_fields_from_parameter_mappings(json_str):
     if 'field-id' not in json_str:
@@ -85,7 +94,7 @@ def get_fields_from_parameter_mappings(json_str):
         if 'target' in l:
             target = l['target']
             if len(target) > 1:
-                fields += get_maybe_field(target[1], 'fk->')
+                fields += get_maybe_field(target[1])
 
     return fields
 
@@ -95,7 +104,7 @@ def get_fields_from_visualization_settings(json_str):
         for key in col_settings.keys():
             if key is not None and key != '':
                 ref_list = json.loads(key)
-                return get_maybe_field(ref_list, 'ref')
+                return get_maybe_field(ref_list)
             else:
                 return []
     
@@ -107,9 +116,9 @@ def get_fields_from_visualization_settings(json_str):
             if 'fieldRef' in col:
                 field_ref = col['fieldRef']
                 if len(field_ref) > 0 and field_ref[0] != 'field-id':
-                    field = get_maybe_field(field_ref[1], 'datetime-field')
+                    field = get_maybe_field(field_ref[1])
                 else:
-                    field = get_maybe_field(field_ref, 'field-id')
+                    field = get_maybe_field(field_ref)
                 fields += field
         return fields
 
