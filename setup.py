@@ -19,7 +19,7 @@ requirements = [
     'psycopg2-binary==2.8.5',
     'pyrsistent==0.16.0',
     'python-dotenv==0.13.0',
-    'PyYAML==5.3.1',
+    'PyYAML==5.4',
     'simplejson==3.17.0',
     'six==1.15.0',
     'sqlacodegen==2.2.0',
